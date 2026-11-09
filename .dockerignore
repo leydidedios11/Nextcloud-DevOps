@@ -1,0 +1,11 @@
+﻿.git
+.github
+.env
+.env.*
+!.env.example
+*.md
+*.log
+node_modules
+vendor
+.DS_Store
+Thumbs.db

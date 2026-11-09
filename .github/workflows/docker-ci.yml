@@ -1,0 +1,32 @@
+﻿name: Nextcloud Docker CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  docker-build:
+    name: Build Nextcloud Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Nextcloud image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/nextcloud/Dockerfile
+          push: false
+          tags: nextcloud-custom:ci
