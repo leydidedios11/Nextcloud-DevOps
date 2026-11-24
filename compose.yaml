@@ -1,8 +1,9 @@
-﻿services:
-
+services:
   db:
-    image: mariadb:11.4.9
-    container_name: nextcloud-db
+    build:
+      context: ./docker/mariadb
+      dockerfile: Dockerfile
+    image: nextcloud-mariadb-custom:1.0
     restart: unless-stopped
 
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
@@ -30,9 +31,7 @@
     build:
       context: .
       dockerfile: docker/nextcloud/Dockerfile
-
     image: nextcloud-custom:1.0
-    container_name: nextcloud-app
     restart: unless-stopped
 
     depends_on:
@@ -65,4 +64,3 @@ volumes:
 networks:
   nextcloud_network:
     driver: bridge
-    name: nextcloud_network

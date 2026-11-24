@@ -1,4 +1,4 @@
-﻿name: Nextcloud Docker CI
+name: Nextcloud Docker CI
 
 on:
   push:
@@ -13,17 +13,20 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MARIADB_ROOT_PASSWORD: ci-root-password
       MARIADB_DATABASE: nextcloud
       MARIADB_USER: nextcloud
-      MARIADB_PASSWORD: ci-database-password
       NEXTCLOUD_ADMIN_USER: admin
-      NEXTCLOUD_ADMIN_PASSWORD: ci-admin-password
       NEXTCLOUD_PORT: 8080
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Generate temporary Compose credentials
+        run: |
+          for key in MARIADB_ROOT_PASSWORD MARIADB_PASSWORD NEXTCLOUD_ADMIN_PASSWORD; do
+            echo "$key=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          done
 
       - name: Validate Docker Compose configuration
         run: docker compose config --quiet

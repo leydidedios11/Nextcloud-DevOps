@@ -60,11 +60,11 @@ notepad .env
 cp .env.example .env
 ```
 
-Abre `.env` con un editor de texto y cambia los valores
-`REPLACE_WITH_STRONG_...` por contraseñas largas, únicas y distintas para MariaDB
-y para el administrador de Nextcloud. No agregues comillas. Guarda el archivo
-antes de seguir. El usuario administrador inicial es `admin`; puedes cambiarlo
-en `NEXTCLOUD_ADMIN_USER`.
+Abre `.env` con un editor de texto y cambia todos los valores
+`CAMBIAR_POR_...` por contraseñas largas, únicas y distintas para MariaDB y para
+el administrador de Nextcloud. No agregues comillas. Guarda el archivo antes
+de seguir. El usuario administrador inicial es `admin`; puedes cambiarlo en
+`NEXTCLOUD_ADMIN_USER`.
 
 El archivo `.env` contiene contraseñas y no se debe subir a GitHub. Está excluido
 por `.gitignore` y `.dockerignore`; el archivo seguro para compartir es
@@ -106,7 +106,26 @@ Nextcloud terminó su instalación:
 docker compose exec -u www-data app php occ status
 ```
 
-Después, guarda un valor de prueba desde Nextcloud y léelo de nuevo:
+Para demostrar una petición HTTP real, usa WebDAV para guardar un archivo en
+Nextcloud y descargarlo de nuevo. Estos comandos de PowerShell usan `curl.exe`
+(no el alias `curl` de Windows PowerShell):
+
+```powershell
+Set-Content -NoNewline -Path .\prueba.txt -Value "conexion-ok"
+curl.exe --fail --show-error --write-out "HTTP %{http_code}`n" --user admin --upload-file .\prueba.txt http://localhost:8080/remote.php/dav/files/admin/prueba.txt
+curl.exe --fail --show-error --write-out "HTTP %{http_code}`n" --user admin http://localhost:8080/remote.php/dav/files/admin/prueba.txt --output .\prueba-recuperada.txt
+Get-Content .\prueba-recuperada.txt
+```
+
+`curl.exe` pedirá la contraseña sin incluirla en el comando. Si cambiaste
+`NEXTCLOUD_ADMIN_USER`, reemplaza `admin` tanto en `--user` como en la URL.
+`Get-Content` debe mostrar `conexion-ok`. La solicitud llega a Nextcloud; la
+aplicación guarda el archivo en su volumen y sus metadatos en MariaDB mediante
+el servicio `db`. MariaDB usa el protocolo SQL, no HTTP, por lo que `curl` no se
+conecta directamente a ese contenedor.
+
+Como comprobación adicional de la comunicación con la base de datos, guarda un
+valor de configuración de la aplicación y léelo de nuevo:
 
 ```console
 docker compose exec -u www-data app php occ config:app:set core docker_demo --value=conexion-ok
@@ -114,9 +133,8 @@ docker compose exec -u www-data app php occ config:app:get core docker_demo
 ```
 
 El segundo comando debe mostrar `conexion-ok`. `occ` se ejecuta dentro del
-contenedor de Nextcloud; al guardar y leer este ajuste, la aplicación consulta
-la base de datos configurada en `db`. Esta comprobación sirve como evidencia de
-una operación real entre los servicios.
+contenedor de Nextcloud y al guardar y leer el ajuste la aplicación consulta la
+base de datos configurada en `db`.
 
 ## Comandos útiles
 
