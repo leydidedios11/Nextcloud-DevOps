@@ -217,3 +217,5 @@ capturas propias de:
 
 Revisa que las capturas sean legibles y que el PDF incluya el enlace al
 repositorio de GitHub.
+
+Actualizacion de documentacion para validar la ejecucion automatica del Pipeline mediante Poll SCM.
